@@ -1,3 +1,8 @@
+# [!NOTE] uv-dynamic-versioning plugin doesn't work with the uv build backend right now. (ref. https://github.com/astral-sh/uv/issues/14561)
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
 [project]
 name = "python-project-template"
 dynamic = ["version"]
@@ -26,6 +31,7 @@ packages = ["src/pkg"]
 
 [tool.uv-dynamic-versioning]
 fallback-version = "0.0.0"
+pattern = "default-unprefixed"
 vcs = "git"
 style = "pep440"
 bump = true
@@ -179,8 +185,3 @@ ban-relative-imports = "all"
 [tool.mypy]
 check_untyped_defs = true
 ignore_missing_imports = true
-
-# [!NOTE] uv-dynamic-versioning plugin doesn't work with the uv build backend right now. (ref. https://github.com/astral-sh/uv/issues/14561)
-[build-system]
-requires = ["hatchling", "uv-dynamic-versioning"]
-build-backend = "hatchling.build"
