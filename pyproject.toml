@@ -10,7 +10,7 @@ maintainers = [
 ]
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.14,<4.0" # Specify your supported Python versions here
+requires-python = "==3.14.*" # Use latest Python version by default
 dependencies = [
     # "loguru (>=0.7.2,<1.0.0)",
     # "python-dotenv (>=1.1.1,<2.0.0)",
@@ -41,13 +41,13 @@ required-version = ">=0.9.9"
 
 [dependency-groups]
 dev = [
-    "pre-commit (>=4.4.0,<5.0.0)",
-    "poethepoet (>=0.37.0,<1.0.0)",
-    "dvc[s3] (>=3.64.0,<4.0.0)",
+    "prek (>=0.5.2,<1.0.0)",
+    "poethepoet (>=0.44.0,<1.0.0)",
+    "dvc[s3] (>=3.67.1,<4.0.0)",
     # "typer (>=0.20.0,<1.0.0)",
     # ...
 ]
-lint = ["mypy>=1.11.2", "ruff>=0.14.5"]
+lint = ["ty>=0.0.78", "ruff>=0.16.6"]
 docs = [
     # "mkdocs (>=1.6.1,<2.0.0)",
     # "mkdocs-material[imaging] (>=9.7.0,<10.0.0)",
@@ -126,7 +126,7 @@ exclude = [
     "venv",
 ]
 line-length = 140
-target-version = "py313"
+target-version = "py314"
 
 [tool.ruff.format]
 quote-style = "double"
@@ -152,6 +152,7 @@ ignore = [
     "RET504",  # Unnecessary assignment to {name} before `return` statement -> useful for clarity
     "TD",  # Check TODOs in the project -> good to have some punctual TODO comments
     "TRY003",  # Avoid specifying long messages outside the exception class -> too much boilerplate code in many cases, overly sensitive
+    "CPY001",  # Missing copyright notice at top of file --> not required
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.

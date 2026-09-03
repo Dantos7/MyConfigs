@@ -13,8 +13,9 @@ Core technology choices:
 
 - [uv](https://docs.astral.sh/uv/) for project management and packaging
 - [ruff](https://docs.astral.sh/ruff/) for linting and formatting
+- [ty](https://docs.astral.sh/ty/) for type checking
 - [DVC](https://dvc.org/) for data version control
-- [pre-commit](https://pre-commit.com/) for managing git hooks
+- [prek](https://prek.j178.dev/) for managing hooks
 - [pytest](https://docs.pytest.org/en/stable/index.html) and [coverage](https://coverage.readthedocs.io/en/stable/) for testing and code coverage
 - [MkDocs](https://www.mkdocs.org/) for documentation
 - [poethepoet](https://poethepoet.natn.io/) for task management
