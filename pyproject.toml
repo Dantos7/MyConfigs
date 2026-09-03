@@ -181,7 +181,3 @@ max-complexity = 15
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
-
-[tool.mypy]
-check_untyped_defs = true
-ignore_missing_imports = true

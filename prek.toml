@@ -1,8 +1,6 @@
-# To install the git pre-commit hooks run:
-#   uv tool install prek
-#   cd <your repo>
+# To install the git hooks run:
 #   prek install
-# To update the pre-commit hooks run:
+# To update the hooks run:
 #   prek autoupdate
 # See https://prek.j178.dev/configuration/#configuration-file for more details on the configuration options
 #:schema https://www.schemastore.org/prek.json
