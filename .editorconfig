@@ -3,17 +3,17 @@
 # Top-most EditorConfig file
 root = true
 
-# Newline ending every file, default charset and 4 spaces indentation (optionally set line ending)
+# Unix-style line endings with a newline ending every file
 [*]
-# end_of_line = lf/crlf
+end_of_line = lf
 trim_trailing_whitespace = true
 insert_final_newline = true
 charset = utf-8
 indent_style = space
 indent_size = 4
 
-# 2 spaces indentation for YAML only
-[*.yaml]
+# 2 spaces indentation for YAML and JSON only
+[*.{yaml,yml,json}]
 indent_style = space
 indent_size = 2
 
