@@ -18,7 +18,7 @@ _exclude:
   - ".DS_Store"
 
 _message_after_copy: |
-  Your project "{{ project_name }}" has been created in {{ _copier_conf.dst_path }}.
+  Your project "{{ project_name }}" has been created in {{ _copier_conf.dst_path }} .
 
   Next steps:
 
