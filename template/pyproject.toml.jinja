@@ -33,9 +33,9 @@ license = "{{ license_type }}"
 {% endif -%}
 requires-python = "{{ requires_python }}"
 dependencies = [
-    # "loguru (>=0.7.2,<1.0.0)",
-    # "python-dotenv (>=1.1.1,<2.0.0)",
-    # "polars (>=1.31.0,<2.0.0)",
+    # "loguru>=0.7.2,<1.0.0",
+    # "python-dotenv>=1.1.1,<2.0.0",
+    # "polars>=1.31.0,<2.0.0",
     # ...
 ]
 {% if repo_url %}
@@ -69,34 +69,36 @@ bump = true
 {% endif %}
 [tool.uv]
 default-groups = {{ groups | tojson }}
-required-version = ">=0.9.9"
+required-version = ">=0.12.0"
+add-bounds = "major"
 
 [dependency-groups]
 dev = [
-    "prek (>=0.5.2,<1.0.0)",
-    "poethepoet (>=0.44.0,<1.0.0)",
+    "prek>=0.5.2,<1.0.0",
+    "poethepoet>=0.44.0,<1.0.0",
 {%- if use_data_dirs and use_dvc %}
-    "dvc[s3] (>=3.67.1,<4.0.0)",
+    "dvc[s3]>=3.67.1,<4.0.0",
 {%- endif %}
     # ...
 ]
-lint = ["ty>=0.0.78", "ruff>=0.16.6"]
+lint = ["ty>=0.0.78", "ruff>=0.16.6"]  # No need to bound major of lint deps (non-critical)
 {%- if use_docs %}
 docs = [
-    "mkdocs (>=1.6.1,<2.0.0)",
-    "mkdocs-material[imaging] (>=9.7.0,<10.0.0)",
-    # "mkdocs-glightbox>=0.5.2",
-    # "mkdocs-llmstxt>=0.4.0",
-    # "mkdocs-redirects>=1.2.2",
-    # "mkdocstrings-python>=1.19.0",
-    # "griffe-warnings-deprecated>=1.1.0",
+    "mkdocs>=1.6.1,<2.0.0",
+    "mkdocs-material[imaging]>=9.7.0,<10.0.0",
+    # "mkdocs-glightbox>=0.5.2,<1.0.0",
+    # "mkdocs-llmstxt>=0.4.0,<1.0.0",
+    # "mkdocs-redirects>=1.2.2,<2.0.0",
+    # "mkdocstrings-python>=1.19.0,<2.0.0",
+    # "griffe-warnings-deprecated>=1.1.0,<2.0.0",
     # ...
 ]
 {%- endif %}
 test = [
-    "pytest (>=9.0.0,<10.0.0)",
-    "pytest-asyncio (>=1.3.0,<2.0.0)",
-    "coverage (>=7.11.3,<8.0.0)",
+    "pytest>=9.0.0,<10.0.0",
+    "pytest-asyncio>=1.3.0,<2.0.0",
+    "pytest-cov>=7.0.0,<8.0.0",
+    "coverage>=7.11.3,<8.0.0",
     # ...
 ]
 
@@ -104,9 +106,9 @@ test = [
 {%- if use_dynamic_versioning %}
 version = "uvx uv-dynamic-versioning"
 {%- endif %}
-test = "coverage run -m pytest tests --ff -vv"
-report = ["test", "_coverage-report"]
-_coverage-report = "coverage report -m"
+test = "pytest tests --ff -vv --cov"
+report = ["test", "cov-report"]
+cov-report = "coverage report -m"
 format = "ruff format ."
 lint = "ruff check . --fix"
 typecheck = "ty check"
@@ -118,12 +120,16 @@ check = ["format", "lint", "typecheck", "test"]
 
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib"]
+testpaths = ["tests"]
 asyncio_default_fixture_loop_scope = "function"  # Or class, module, package, session
 
 [tool.coverage.run]
-include = ["src/{{ package_name }}/*"]  # Comment to include also tests/ code (may help to find unused functions)
+include = ["src/{{ package_name }}/*"]
+data_file = "coverage/.coverage"
 
 [tool.coverage.report]
+show_missing = true
+sort = "-Cover"
 # Regexes for lines to exclude from consideration
 exclude_also = [
     # Don't complain about missing debug-only code:
