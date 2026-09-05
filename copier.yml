@@ -1,0 +1,193 @@
+# Copier template for opinionated Python projects.
+# Docs: https://copier.readthedocs.io/en/stable/configuring/
+
+# --------------------------------------------------------------------------- #
+# Template settings                                                            #
+# --------------------------------------------------------------------------- #
+
+_min_copier_version: "9.4.0"
+_subdirectory: template
+_answers_file: .copier-answers.yml
+
+_exclude:
+  - "copier.yml"
+  - "~*"
+  - "*.py[co]"
+  - "__pycache__"
+  - ".git"
+  - ".DS_Store"
+
+_message_after_copy: |
+  Your project "{{ project_name }}" has been created in {{ _copier_conf.dst_path }}.
+
+  Next steps:
+
+    cd {{ _copier_conf.dst_path }}
+    git init
+    uv sync
+    uv run prek install
+  {%- if use_dynamic_versioning %}
+
+  Versions come from git tags, so tag an initial release before building:
+
+    git commit -am "feat: initial commit" && git tag 0.1.0
+  {%- endif %}
+
+_message_after_update: |
+  "{{ project_name }}" has been updated.
+
+  Review the merge result, resolve any *.rej conflicts, and re-run your checks
+  before committing.
+
+# --------------------------------------------------------------------------- #
+# Identity                                                                     #
+# --------------------------------------------------------------------------- #
+
+project_name:
+  type: str
+  help: Human-readable project name
+  default: My Project
+  validator: >-
+    {% if not project_name | trim %}
+    The project name cannot be empty
+    {% endif %}
+
+project_slug:
+  type: str
+  help: Distribution and repository name (kebab-case)
+  default: "{{ project_name | lower | trim | replace(' ', '-') | replace('_', '-') }}"
+  validator: >-
+    {% if not (project_slug | regex_search('^[a-z0-9][a-z0-9-]*$')) %}
+    Must be lowercase and contain only letters, digits and hyphens
+    {% endif %}
+
+package_name:
+  type: str
+  help: Python import name (snake_case)
+  default: "{{ project_slug | lower | replace('-', '_') }}"
+  validator: >-
+    {% if not (package_name | regex_search('^[a-z_][a-z0-9_]*$')) %}
+    Must be a valid Python identifier: lowercase letters, digits and underscores
+    {% endif %}
+
+project_description:
+  type: str
+  help: One-line description of the project
+  default: ""
+
+author_name:
+  type: str
+  help: Name of the project author
+  validator: >-
+    {% if not author_name | trim %}
+    The author name cannot be empty
+    {% endif %}
+
+author_email:
+  type: str
+  help: Contact email of the project author
+  validator: >-
+    {% if not (author_email | regex_search('^[^@\s]+@[^@\s]+\.[^@\s]+$')) %}
+    Must be a valid email address
+    {% endif %}
+
+github_username:
+  type: str
+  help: GitHub user or organisation hosting the repository (blank to skip badges and links)
+  default: ""
+
+license_type:
+  type: str
+  help: License for the generated project
+  default: MIT
+  choices:
+    MIT: MIT
+    Apache License 2.0: Apache-2.0
+    BSD 3-Clause: BSD-3-Clause
+    None (proprietary): none
+
+copyright_year:
+  type: str
+  help: Year shown in the license header
+  default: "{{ '%Y' | strftime }}"
+  when: "{{ license_type != 'none' }}"
+
+# --------------------------------------------------------------------------- #
+# Python                                                                       #
+# --------------------------------------------------------------------------- #
+
+python_version:
+  type: str
+  help: Target Python version (major.minor)
+  default: "3.14"
+  validator: >-
+    {% if not (python_version | regex_search('^3\.\d+$')) %}
+    Must look like "3.14"
+    {% endif %}
+
+python_constraint:
+  type: str
+  help: How pyproject.toml should constrain the Python version
+  default: exact
+  choices:
+    Exactly this minor version (=={{ python_version }}.*): exact
+    This version or newer (>={{ python_version }}): minimum
+
+# --------------------------------------------------------------------------- #
+# Tooling                                                                      #
+# --------------------------------------------------------------------------- #
+
+line_length:
+  type: int
+  help: Maximum line length enforced by ruff
+  default: 140
+
+use_docs:
+  type: bool
+  help: Set up MkDocs Material documentation?
+  default: false
+
+use_data_dirs:
+  type: bool
+  help: Include a data/ scaffold for public and private datasets?
+  default: false
+
+use_dvc:
+  type: bool
+  help: Track large data files with DVC?
+  default: false
+  when: "{{ use_data_dirs }}"
+
+use_dynamic_versioning:
+  type: bool
+  help: Derive the package version from git tags (uv-dynamic-versioning)?
+  default: true
+
+use_private_registry:
+  type: bool
+  help: Add a commented-out private package index to pyproject.toml?
+  default: false
+
+# --------------------------------------------------------------------------- #
+# Computed values (never prompted)                                             #
+# --------------------------------------------------------------------------- #
+
+has_license:
+  type: bool
+  default: "{{ license_type != 'none' }}"
+  when: false
+
+python_tag:
+  type: str
+  default: "py{{ python_version | replace('.', '') }}"
+  when: false
+
+requires_python:
+  type: str
+  default: "{% if python_constraint == 'exact' %}=={{ python_version }}.*{% else %}>={{ python_version }}{% endif %}"
+  when: false
+
+repo_url:
+  type: str
+  default: "{% if github_username %}https://github.com/{{ github_username }}/{{ project_slug }}{% endif %}"
+  when: false

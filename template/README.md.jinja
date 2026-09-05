@@ -1,0 +1,80 @@
+# {{ project_name }}
+{% if repo_url %}
+<p>
+    <a href="https://www.repostatus.org/#wip"><img src="https://www.repostatus.org/badges/latest/wip.svg" alt="Project Status: WIP – Initial development is in progress."/></a>
+{%- if use_dynamic_versioning %}
+    <a href="{{ repo_url }}"><img alt="Version" src="https://img.shields.io/github/v/release/{{ github_username }}/{{ project_slug }}"></a>
+{%- endif %}
+</p>
+{% endif %}
+{%- if project_description %}
+{{ project_description }}
+{% endif %}
+## 🧰 Tooling
+
+- [uv](https://docs.astral.sh/uv/) for project management and packaging
+- [ruff](https://docs.astral.sh/ruff/) for linting and formatting
+- [ty](https://docs.astral.sh/ty/) for type checking
+{%- if use_data_dirs and use_dvc %}
+- [DVC](https://dvc.org/) for data version control
+{%- endif %}
+- [prek](https://prek.j178.dev/) for managing hooks
+- [pytest](https://docs.pytest.org/en/stable/index.html) and [coverage](https://coverage.readthedocs.io/en/stable/) for testing and code coverage
+{%- if use_docs %}
+- [MkDocs](https://www.mkdocs.org/) for documentation
+{%- endif %}
+- [poethepoet](https://poethepoet.natn.io/) for task management
+- [typos](https://github.com/crate-ci/typos) for spell checking
+- [EditorConfig](https://editorconfig.org/) for maintaining consistent coding styles
+
+## 🚀 Getting started
+
+Requires Python {{ python_version }} and [uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+```bash
+uv sync
+uv run prek install
+```
+
+Common tasks:
+
+```bash
+uv run poe test        # run the test suite
+uv run poe format      # format the code
+uv run poe lint        # lint and autofix
+uv run poe typecheck   # type-check the code
+uv run poe check       # all of the above
+{%- if use_docs %}
+uv run poe docs        # serve the documentation locally
+{%- endif %}
+```
+
+## 📁 Layout
+
+```text
+{{ "%-22s" | format("src/" ~ package_name ~ "/") }}# package source code
+tests/unit/           # unit tests
+tests/integration/    # integration tests
+{%- if use_docs %}
+docs/                 # documentation sources
+{%- endif %}
+{%- if use_data_dirs %}
+data/public/          # data that can be shared publicly
+data/private/         # data that must never be tracked
+{%- endif %}
+```
+{% if use_dynamic_versioning %}
+## 🏷️ Versioning
+
+The package version is derived from git tags by
+[uv-dynamic-versioning](https://github.com/ninoseki/uv-dynamic-versioning). Tag a release to
+publish a new version:
+
+```bash
+git tag 0.1.0
+```
+{% endif %}
+---
+
+Generated from the [python-project-template](https://github.com/Dantos7/python-project-template) Copier template.
+Run `uvx copier update` to pull in later template changes.

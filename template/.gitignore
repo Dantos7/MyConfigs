@@ -223,8 +223,3 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
-
-#### Copier template ####
-
-# Rendered demo project produced by `uv run poe render`
-/demo
