@@ -1,0 +1,229 @@
+{%- set groups = ['dev'] -%}
+{%- if use_docs %}{% set _ = groups.append('docs') %}{% endif -%}
+{%- set _ = groups.append('lint') -%}
+{%- set _ = groups.append('test') -%}
+{% if use_dynamic_versioning -%}
+# [!NOTE] uv-dynamic-versioning plugin doesn't work with the uv build backend right now. (ref. https://github.com/astral-sh/uv/issues/14561)
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+{%- else -%}
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+{%- endif %}
+
+[project]
+name = "{{ project_slug }}"
+{% if use_dynamic_versioning -%}
+dynamic = ["version"]
+{%- else -%}
+version = "0.1.0"
+{%- endif %}
+description = "{{ project_description }}"
+authors = [
+    {name = "{{ author_name }}", email = "{{ author_email }}"},
+]
+maintainers = [
+    {name = "{{ author_name }}", email = "{{ author_email }}"},
+]
+readme = "README.md"
+{% if has_license -%}
+license = "{{ license_type }}"
+{% endif -%}
+requires-python = "{{ requires_python }}"
+dependencies = [
+    # "loguru>=0.7.2,<1.0.0",
+    # "python-dotenv>=1.1.1,<2.0.0",
+    # "polars>=1.31.0,<2.0.0",
+    # ...
+]
+{% if repo_url %}
+[project.urls]
+Homepage = "{{ repo_url }}"
+Repository = "{{ repo_url }}"
+Changelog = "{{ repo_url }}/blob/main/CHANGELOG.md"
+{%- if use_docs %}
+Documentation = "https://{{ github_username }}.github.io/{{ project_slug }}/"
+{%- endif %}
+{% endif %}
+{%- if use_dynamic_versioning %}
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+{% endif %}
+[tool.hatch.build.targets.wheel]
+packages = ["src/{{ package_name }}"]
+{% if use_dynamic_versioning %}
+[tool.uv-dynamic-versioning]
+fallback-version = "0.0.0"
+pattern = "default-unprefixed"
+vcs = "git"
+style = "pep440"
+bump = true
+{% endif -%}
+{%- if use_private_registry %}
+# * Uncomment here if you need to use a private registry
+# [[tool.uv.index]]
+# name = "private-registry"
+# url = "https://pkgs.dev.azure.com/<ORGANIZATION>/<PROJECT>/_packaging/<FEED>/pypi/simple/"
+{% endif %}
+[tool.uv]
+default-groups = {{ groups | tojson }}
+required-version = ">=0.12.0"
+add-bounds = "major"
+
+[dependency-groups]
+dev = [
+    "prek>=0.5.2,<1.0.0",
+    "poethepoet>=0.44.0,<1.0.0",
+{%- if use_data_dirs and use_dvc %}
+    "dvc[s3]>=3.67.1,<4.0.0",
+{%- endif %}
+    # ...
+]
+lint = ["ty>=0.0.78", "ruff>=0.16.6"]  # No need to bound major of lint deps (non-critical)
+{%- if use_docs %}
+docs = [
+    "mkdocs>=1.6.1,<2.0.0",
+    "mkdocs-material[imaging]>=9.7.0,<10.0.0",
+    # "mkdocs-glightbox>=0.5.2,<1.0.0",
+    # "mkdocs-llmstxt>=0.4.0,<1.0.0",
+    # "mkdocs-redirects>=1.2.2,<2.0.0",
+    # "mkdocstrings-python>=1.19.0,<2.0.0",
+    # "griffe-warnings-deprecated>=1.1.0,<2.0.0",
+    # ...
+]
+{%- endif %}
+test = [
+    "pytest>=9.0.0,<10.0.0",
+    "pytest-asyncio>=1.3.0,<2.0.0",
+    "pytest-cov>=7.0.0,<8.0.0",
+    "coverage>=7.11.3,<8.0.0",
+    # ...
+]
+
+[tool.poe.tasks]
+{%- if use_dynamic_versioning %}
+version = "uvx uv-dynamic-versioning"
+{%- endif %}
+test = "pytest tests --ff -vv --cov"
+report = ["test", "cov-report"]
+cov-report = "coverage report -m"
+format = "ruff format ."
+lint = "ruff check . --fix"
+typecheck = "ty check"
+{%- if use_docs %}
+docs = "mkdocs serve"
+docs-build = "mkdocs build --strict"
+{%- endif %}
+check = ["format", "lint", "typecheck", "test"]
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
+testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"  # Or class, module, package, session
+
+[tool.coverage.run]
+include = ["src/{{ package_name }}/*"]
+data_file = "coverage/.coverage"
+
+[tool.coverage.report]
+show_missing = true
+sort = "-Cover"
+# Regexes for lines to exclude from consideration
+exclude_also = [
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+line-length = {{ line_length }}
+target-version = "{{ python_tag }}"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["ALL"]  # Refer to https://docs.astral.sh/ruff/rules/ and click on the specific rule to understand why it is important
+ignore = [
+    "COM819",  # Trailing comma prohibited -> handled by formatter
+    "D203",  # 1 blank line required before class docstring -> conflicts with D211, pydocstyle default ignore
+    "D206",  # Docstring should be indented with spaces, not tabs -> handled by formatter
+    "D213",  # Multi-line docstring summary should start at the second line -> conflicts with D212, pydocstyle default ignore for Google style
+    "D404",  # First word of the docstring should not be "This" -> pydocstyle default ignore for Google style
+    "E501",  # Line too long -> handled by formatter
+    "EM101",  # Exception must not use a string literal, assign to variable first -> too much boilerplate code in many cases
+    "EM102",  # Exception must not use an f-string literal, assign to variable first -> too much boilerplate code in many cases
+    "FIX",  # Check for FIXME, TODO and other temporary developer notes -> good to have some punctual TODO comments
+    "PLR0913",  # Too many arguments to function call ({arguments} > {max_arguments}) -> sometimes necessary for clarity
+    "PLR0915",  # Too many statements ({statements} > {max_statements}) -> sometimes necessary, complexity is measured by McCabe
+    "RET504",  # Unnecessary assignment to {name} before `return` statement -> useful for clarity
+    "TD",  # Check TODOs in the project -> good to have some punctual TODO comments
+    "TRY003",  # Avoid specifying long messages outside the exception class -> too much boilerplate code in many cases, overly sensitive
+    "CPY001",  # Missing copyright notice at top of file --> not required # noqa: typos
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/**" = ["S101"]
+
+[tool.ruff.lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
